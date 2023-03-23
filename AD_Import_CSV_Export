@@ -1,0 +1,39 @@
+Import-Module ActiveDirectory
+<# Ensure that the below variables are updated to match relevant information #>
+$RITMNo=" " #RITM number from KSE
+$esigpermissions=" " #This is typically what is used, some agencies may have a custom permission requirement
+$esiggroupname=" " #this is the name of the DocuSign group to add users to
+$esigAccountID=" "
+#list the SAMAccountNames from the KSE ticket here
+$Identities=@(“ ") 
+$outputfile="C:\Users\UserName\Documents\ePen User Imports\"+$RITMNo+".csv" #output location for the CSV file
+
+$results = @()
+
+foreach ($user in $identities) {
+$aduser=get-aduser -identity $user -Properties samaccountname, emailaddress, enabled, displayname, department, company,office,postalcode,officephone,state,streetaddress,title,city
+$results+=New-Object -TypeName PSCustomObject -Property @{
+    AccountID=$esigAccountID
+    FirstName=$aduser.GivenName
+    LastName=$aduser.Surname
+    UserEmail=$aduser.EmailAddress
+    eSignPermissionProfile=$esigpermissions
+    enableCLM=""
+    CLMPermissionProfile=""
+    Group=$esiggroupname
+    Language="en"
+    UserTitle=$aduser.Title
+    CompanyName=$aduser.Department
+    AddressLine1=$aduser.StreetAddress
+    AddressLine2=""
+    City=$aduser.City
+    StateRegionProvince=$aduser.State
+    PostalCode=$aduser.PostalCode
+    Phone=$aduser.OfficePhone
+    AutoActivate="TRUE"
+}
+
+}
+$results | Select AccountID,FirstName,LastName,UserEmail,eSignPermissionProfile,enableCLM,CLMPermissionProfile,Group,Language,UserTitle,CompanyName,AddressLine1,AddressLine2,City,StateRegionProvince,PostalCode,Phone,AutoActivate | export-csv -Path $outputfile -NTI
+
+
