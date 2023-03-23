@@ -1,0 +1,17 @@
+$results = @()
+$usrlist = get-aduser -filter 'mail -like "*@vita.virginia.gov" -and SurName -eq "brown"' -Properties Mail,DisplayName
+foreach ($usr in $usrlist) {
+$grpmembership = Get-ADPrincipalGroupMembership -Identity $usr.SamAccountName -ResourceContextServer cov.virginia.gov
+foreach ($grp in $grpmembership) {
+$results += New-Object -TypeName PSCustomObject -Property @{
+    givenname=$usr.GivenName
+    surname=$usr.SurName
+    displayname=$usr.DisplayName
+    samaccountname=$usr.SamAccountName
+    mail=$usr.Mail
+    ADGroupName=$grp.Name
+    ADGroupCategory=$grp.GroupScope
+    }
+}
+}
+$results | select samaccountname,displayname,givenname,mail,adgroupname,adgroupcategory | ft
