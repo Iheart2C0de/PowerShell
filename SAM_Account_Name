@@ -1,0 +1,1 @@
+get-aduser -filter 'mail -like "*@domain" -and SurName -eq ""'  -Properties Mail | select givenname, surname, displayname, samaccountname, mail | ft
